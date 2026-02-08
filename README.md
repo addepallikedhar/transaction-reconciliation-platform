@@ -109,8 +109,33 @@ Rules are applied deterministically and are designed to be easily extensible.
 The project is designed to achieve **high line and branch coverage**, suitable for Sonar-based quality gates.
 
 ---
+## Cloud-Native Execution Model
+
+The application supports two execution modes using Spring Profiles:
+
+- **API Mode** (`api`): Runs as a stateless REST service for authentication, file ingestion, and result queries.
+- **Batch Mode** (`batch`): Executes reconciliation as a one-off Spring Batch job and exits, designed to mirror Cloud Run Job behavior.
+
+This design enables cost-efficient batch execution without always-on compute resources.
+---
+
+## How to Run (Local Simulation of Cloud Run)
+
+API Mode (like Cloud Run Service)
+
+```bash
+docker build -t recon-app .
+docker run -p 8080:8080 \
+-e SPRING_PROFILES_ACTIVE=api \
+recon-app
+```
+Batch Mode (like Cloud Run Job)
+```bash
+docker run \
+-e SPRING_PROFILES_ACTIVE=batch \
+recon-app 123
+```
 
 ## How to Run the Application
-
 ```bash
 mvn spring-boot:run
