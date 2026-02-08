@@ -9,4 +9,6 @@ public interface TransactionRecordRepository
         extends JpaRepository<TransactionRecordEntity, Long> {
 
     List<TransactionRecordEntity> findByFile(TransactionFileEntity file);
+    List<TransactionRecordEntity> findByFileId(Long fileId);
+
 }

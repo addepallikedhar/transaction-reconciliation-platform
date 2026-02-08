@@ -12,66 +12,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReconciliationService {
 
-    private final TransactionRecordRepository recordRepository;
-    private final ReconciliationResultRepository resultRepository;
-    private final ReconciliationEngine engine;
+    private final JobLauncher jobLauncher;
+    private final Job reconciliationJob;
 
-    @Transactional
     public void reconcileFile(TransactionFileEntity file) {
+        try {
+            JobParameters params = new JobParametersBuilder()
+                    .addLong("fileId", file.getId())
+                    .addLong("time", System.currentTimeMillis())
+                    .toJobParameters();
 
-        List<TransactionRecordEntity> records =
-                recordRepository.findByFile(file);
+            jobLauncher.run(reconciliationJob, params);
 
-        ReconciliationContext context = new ReconciliationContext();
-
-        for (TransactionRecordEntity record : records) {
-            ReconciliationResultEntity result =
-                    engine.reconcile(record, context);
-
-            record.setStatus(result.getResultCode());
-
-            resultRepository.save(result);
-            recordRepository.save(record);
+        } catch (Exception e) {
+            throw new IllegalStateException("Batch job failed", e);
         }
     }
-
-    @Transactional
-    public void reconcileFile(TransactionFileEntity file) {
-
-        auditService.log(
-                "TRANSACTION_FILE",
-                file.getId(),
-                "STATUS_CHANGE",
-                file.getStatus(),
-                "PROCESSING");
-
-        file.setStatus("PROCESSING");
-
-        List<TransactionRecordEntity> records =
-                recordRepository.findByFile(file);
-
-        ReconciliationContext context = new ReconciliationContext();
-
-        for (TransactionRecordEntity record : records) {
-
-            ReconciliationResultEntity result =
-                    engine.reconcile(record, context);
-
-            record.setStatus(result.getResultCode());
-
-            resultRepository.save(result);
-            recordRepository.save(record);
-        }
-
-        auditService.log(
-                "TRANSACTION_FILE",
-                file.getId(),
-                "STATUS_CHANGE",
-                "PROCESSING",
-                "PROCESSED");
-
-        file.setStatus("PROCESSED");
-    }
-
 }
+
 
