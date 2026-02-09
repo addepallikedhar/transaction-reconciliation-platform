@@ -21,3 +21,5 @@ spring:
 logging:
   level:
     root: INFO
+app:
+  mode: api   # or batch
