@@ -1,21 +1,25 @@
 package com.project.recon.service;
 
 import com.project.recon.entity.AuditLogEntity;
+import com.project.recon.repository.AuditLogRepository;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
-@RequiredArgsConstructor
 public class AuditService {
 
-    private final AuditLogRepository auditLogRepository;
+    private final AuditLogRepository auditRepo;
 
-    public void log(
-            String entityType,
-            Long entityId,
-            String action,
-            String oldValue,
-            String newValue) {
+    public AuditService(AuditLogRepository auditRepo) {
+        this.auditRepo = auditRepo;
+    }
+
+    public void log(String entityType,
+                    Long entityId,
+                    String action,
+                    String oldValue,
+                    String newValue) {
 
         AuditLogEntity audit = new AuditLogEntity();
         audit.setEntityType(entityType);
@@ -25,6 +29,6 @@ public class AuditService {
         audit.setNewValue(newValue);
         audit.setCreatedAt(LocalDateTime.now());
 
-        auditLogRepository.save(audit);
+        auditRepo.save(audit);
     }
 }

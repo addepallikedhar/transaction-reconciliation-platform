@@ -4,44 +4,52 @@ import com.project.recon.entity.TransactionFileEntity;
 import com.project.recon.exception.DuplicateFileException;
 import com.project.recon.repository.TransactionFileRepository;
 import com.project.recon.util.FileHashUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class FileIngestionService {
 
-    private final TransactionFileRepository fileRepository;
+    private final TransactionFileRepository fileRepo;
     private final AuditService auditService;
 
+    public FileIngestionService(TransactionFileRepository fileRepo,
+                                AuditService auditService) {
+        this.fileRepo = fileRepo;
+        this.auditService = auditService;
+    }
+
     @Transactional
-    public TransactionFileEntity ingestFile(
-            String fileName,
-            List<String> csvLines) {
+    public TransactionFileEntity ingest(String fileName,
+                                        List<String> lines) {
 
-        String content = String.join("\n", csvLines);
-        String fileHash = FileHashUtil.sha256(content);
+        String content = String.join("\n", lines);
+        String hash = FileHashUtil.sha256(content);
 
-        fileRepository.findByFileHash(fileHash)
-                .ifPresent(f ->
-                { throw new DuplicateFileException(
-                        "File already processed: " + fileName); });
+        fileRepo.findByFileHash(hash)
+                .ifPresent(f -> {
+                    throw new DuplicateFileException(
+                            "File already processed: " + fileName);
+                });
 
         TransactionFileEntity file = new TransactionFileEntity();
         file.setFileName(fileName);
-        file.setFileHash(fileHash);
+        file.setFileHash(hash);
         file.setStatus("RECEIVED");
         file.setUploadedAt(LocalDateTime.now());
 
-        TransactionFileEntity saved = fileRepository.save(file);
+        TransactionFileEntity saved = fileRepo.save(file);
 
         auditService.log(
                 "TRANSACTION_FILE",
                 saved.getId(),
                 "CREATED",
                 null,
-                "RECEIVED");
+                "RECEIVED"
+        );
 
         return saved;
     }

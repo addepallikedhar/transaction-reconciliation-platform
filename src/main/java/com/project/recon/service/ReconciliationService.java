@@ -1,33 +1,33 @@
 package com.project.recon.service;
 
-import com.project.recon.engine.ReconciliationContext;
-import com.project.recon.engine.ReconciliationEngine;
-import com.project.recon.entity.ReconciliationResultEntity;
-import com.project.recon.entity.TransactionFileEntity;
-import com.project.recon.entity.TransactionRecordEntity;
-
-import java.util.List;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class ReconciliationService {
 
     private final JobLauncher jobLauncher;
     private final Job reconciliationJob;
 
-    public void reconcileFile(TransactionFileEntity file) {
+    public ReconciliationService(JobLauncher jobLauncher,
+                                 Job reconciliationJob) {
+        this.jobLauncher = jobLauncher;
+        this.reconciliationJob = reconciliationJob;
+    }
+
+    public void runBatch(Long fileId) {
         try {
-            JobParameters params = new JobParametersBuilder()
-                    .addLong("fileId", file.getId())
-                    .addLong("time", System.currentTimeMillis())
-                    .toJobParameters();
-
-            jobLauncher.run(reconciliationJob, params);
-
+            jobLauncher.run(
+                    reconciliationJob,
+                    new JobParametersBuilder()
+                            .addLong("fileId", fileId)
+                            .addLong("time", System.currentTimeMillis())
+                            .toJobParameters()
+            );
         } catch (Exception e) {
-            throw new IllegalStateException("Batch job failed", e);
+            throw new IllegalStateException("Batch failed", e);
         }
     }
 }
-
-

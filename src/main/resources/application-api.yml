@@ -1,0 +1,11 @@
+spring:
+  config:
+    activate:
+      on-profile: api
+
+server:
+  port: 8080
+
+app:
+  mode: api   # or batch
+

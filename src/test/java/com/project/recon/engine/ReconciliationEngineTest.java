@@ -1,5 +1,15 @@
 package com.project.recon.engine;
 
+import com.project.recon.entity.ReconciliationResultEntity;
+import com.project.recon.entity.TransactionRecordEntity;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+import static org.junit.Assert.assertEquals;
+
 public class ReconciliationEngineTest {
 
     private ReconciliationEngine engine;
@@ -12,8 +22,9 @@ public class ReconciliationEngineTest {
     }
 
     @Test
-    public void testMatchedTransaction() {
-        TransactionRecordEntity record = buildRecord("REF1", BigDecimal.TEN, LocalDate.now());
+    public void matchedTransaction() {
+        TransactionRecordEntity record =
+                record("REF1", LocalDate.now());
 
         ReconciliationResultEntity result =
                 engine.reconcile(record, context);
@@ -22,21 +33,21 @@ public class ReconciliationEngineTest {
     }
 
     @Test
-    public void testDuplicateTransaction() {
-        TransactionRecordEntity record1 = buildRecord("REF1", BigDecimal.TEN, LocalDate.now());
-        TransactionRecordEntity record2 = buildRecord("REF1", BigDecimal.TEN, LocalDate.now());
+    public void duplicateTransaction() {
+        TransactionRecordEntity r1 = record("REF1", LocalDate.now());
+        TransactionRecordEntity r2 = record("REF1", LocalDate.now());
 
-        engine.reconcile(record1, context);
+        engine.reconcile(r1, context);
         ReconciliationResultEntity result =
-                engine.reconcile(record2, context);
+                engine.reconcile(r2, context);
 
         assertEquals("DUPLICATE", result.getResultCode());
     }
 
     @Test
-    public void testInvalidBusinessDate() {
+    public void invalidFutureDate() {
         TransactionRecordEntity record =
-                buildRecord("REF2", BigDecimal.TEN, LocalDate.now().plusDays(1));
+                record("REF2", LocalDate.now().plusDays(1));
 
         ReconciliationResultEntity result =
                 engine.reconcile(record, context);
@@ -44,13 +55,11 @@ public class ReconciliationEngineTest {
         assertEquals("INVALID_DATE", result.getResultCode());
     }
 
-    private TransactionRecordEntity buildRecord(
-            String ref, BigDecimal amount, LocalDate date) {
-
-        TransactionRecordEntity record = new TransactionRecordEntity();
-        record.setReferenceId(ref);
-        record.setAmount(amount);
-        record.setBusinessDate(date);
-        return record;
+    private TransactionRecordEntity record(String ref, LocalDate date) {
+        TransactionRecordEntity r = new TransactionRecordEntity();
+        r.setReferenceId(ref);
+        r.setAmount(BigDecimal.TEN);
+        r.setBusinessDate(date);
+        return r;
     }
 }

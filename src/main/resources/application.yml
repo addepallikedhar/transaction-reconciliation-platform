@@ -1,4 +1,23 @@
 security:
   jwt:
-    secret: "replace-with-very-long-secure-secret-key-1234567890"
+    secret: very-long-secure-secret-key-for-demo-only-1234567890
     expiration-ms: 3600000
+
+spring:
+  application:
+    name: transaction-reconciliation-platform
+
+  datasource:
+    url: jdbc:h2:mem:recondb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+logging:
+  level:
+    root: INFO

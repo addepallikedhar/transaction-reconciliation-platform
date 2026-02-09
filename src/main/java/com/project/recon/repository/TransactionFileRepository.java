@@ -1,7 +1,7 @@
 package com.project.recon.repository;
 
 import com.project.recon.entity.TransactionFileEntity;
-
+import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface TransactionFileRepository
@@ -9,3 +9,4 @@ public interface TransactionFileRepository
 
     Optional<TransactionFileEntity> findByFileHash(String fileHash);
 }
+

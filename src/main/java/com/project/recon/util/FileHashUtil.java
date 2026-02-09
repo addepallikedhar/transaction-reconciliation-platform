@@ -2,6 +2,7 @@ package com.project.recon.util;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.HexFormat;
 
 public final class FileHashUtil {
 
@@ -11,18 +12,9 @@ public final class FileHashUtil {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(content.getBytes(StandardCharsets.UTF_8));
-
-            return hashToHex(hash);
+            return HexFormat.of().formatHex(hash);
         } catch (Exception e) {
             throw new IllegalStateException("Unable to calculate hash", e);
         }
-    }
-
-    private static String hashToHex(byte[] hash) {
-        StringBuilder hex = new StringBuilder();
-        for (byte b : hash) {
-            hex.append(String.format("%02x", b));
-        }
-        return hex.toString();
     }
 }
